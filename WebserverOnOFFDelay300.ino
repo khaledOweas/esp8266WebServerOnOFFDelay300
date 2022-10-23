@@ -7,8 +7,8 @@
 #include <ESP8266WiFi.h>
 
 // Replace with your network credentials
-const char* ssid     = "SSID";
-const char* password = "password";
+const char* ssid     = "TE-TATA";
+const char* password = "_P@ssw0rd_";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -16,20 +16,16 @@ WiFiServer server(80);
 // Variable to store the HTTP request
 String header;
 
-// Auxiliar variables to store the current output state
-String output5State = "off";
-String output4State = "off";
 
 // Assign output variables to GPIO pins
-const int output5 = 5;
-const int output4 = 4;
+const int output5 = 5; 
 
 // Current time
 unsigned long currentTime = millis();
 // Previous time
 unsigned long previousTime = 0; 
 // Define timeout time in milliseconds (example: 2000ms = 2s)
-const long timeoutTime = 2000;
+const long timeoutTime = 19000;
 
 void setup() {
   Serial.begin(115200);
@@ -53,7 +49,7 @@ void setup() {
   Serial.println(WiFi.localIP());
   server.begin();
 }
-
+ 
 void loop(){
   WiFiClient client = server.available();   // Listen for incoming clients
 
@@ -61,8 +57,8 @@ void loop(){
     Serial.println("New Client.");          // print a message out in the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     currentTime = millis();
-    previousTime = currentTime;
-    while (client.connected() && currentTime - previousTime <= timeoutTime) { // loop while the client's connected
+   previousTime = currentTime;
+    while (client.connected() && currentTime - previousTime <= timeoutTime) {  // loop while the client's connected 
       currentTime = millis();         
       if (client.available()) {             // if there's bytes to read from the client,
         char c = client.read();             // read a byte, then
@@ -81,11 +77,10 @@ void loop(){
             
             // turns the GPIOs on and off
             if (header.indexOf("GET /5/on") >= 0) {
-              Serial.println("GPIO 5 on");
-              output5State = "on";
-              digitalWrite(output5, HIGH);
+              Serial.println("GPIO 5 on"); 
+              digitalWrite(output5, LOW);
               delay(40);
-               digitalWrite(output5, LOW);
+              digitalWrite(output5, HIGH);
             }  
             
             // Display the HTML web page
@@ -100,16 +95,12 @@ void loop(){
             client.println(".button2 {background-color: #77878A;}</style></head>");
             
             // Web Page Heading
-            client.println("<body><h1>ESP8266 Web Server</h1>");
-            
-            // Display current state, and ON/OFF buttons for GPIO 5  
-            client.println("<p>GPIO 5 - State " + output5State + "</p>");
+            client.println("<body><h1> Open Gate Programe </h1>");
+             
             // If the output5State is off, it displays the ON button       
-            if (output5State=="off") {
-              client.println("<p><a href=\"/5/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/5/off\"><button class=\"button button2\">OFF</button></a></p>");
-            }  
+            
+            client.println("<p> <button id=\"myBtn\" onclick=\"btnC()\" class=\"button\">Open Gate </button></p>");
+            client.println("<script>const button=document.getElementById('myBtn');function freeze(){button.disabled=!0,console.log('Set Diable By True'),setTimeout(function(){console.log('Set Disable By False'),button.disabled=!1},7e3)}function btnC(){if(button.disabled)console.log('Buttn is Not Disabled ');else{console.log('Open Light ');let e=new XMLHttpRequest;e.open('GET','/5/on',!0),e.send(),freeze()}}button.disabled=!1;</script>");
             client.println("</body></html>");
             
             // The HTTP response ends with another blank line
